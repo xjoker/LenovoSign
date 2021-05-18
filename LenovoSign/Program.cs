@@ -1,5 +1,5 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
+using System;
 
 namespace LenovoSign
 {
@@ -16,7 +16,11 @@ namespace LenovoSign
                     password = o.password;
                 });
 
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) Console.WriteLine("用户名密码必须提供");
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                Console.WriteLine("用户名密码必须提供");
+                return;
+            }
 
             var baseInfoModel = new LenovoBaseInfoModel
             {
