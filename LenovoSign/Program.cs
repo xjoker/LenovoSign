@@ -1,5 +1,7 @@
 ﻿using CommandLine;
 using System;
+using System.Threading;
+using HulkV2;
 
 namespace LenovoSign
 {
@@ -24,7 +26,7 @@ namespace LenovoSign
 
             var baseInfoModel = new LenovoBaseInfoModel
             {
-                imei = "16213049994264620",
+                imei = "16213049994211120",
                 phoneincremental = "eng.073325",
                 phoneproduct = "havoc",
                 phonedisplay = "QQ3A.25.001",
@@ -38,14 +40,41 @@ namespace LenovoSign
                 systemVersion = "10"
             };
 
-            var t = new LenovoUtils(username, password, baseInfoModel);
-            var step1 = t.Login();
-            var step2 = t.GetToken(step1);
-            var step3 = t.GetSessionId(step2);
-            var step4 = t.DaySign(step3.Res.Lenovoid, step3.Res.Sessionid, step3.Res.Token);
+            var lastSignTime = DateTime.Now.AddDays(-1);
+           
+            while (true)
+            {
+                try
+                {
+                    if (DateTime.Now.Hour>8 && lastSignTime.Day!=DateTime.Now.Day)
+                    {
+                        Thread.Sleep(1000 * 60 * RandomHelper.RNGRandomInt(1, 100));
+                        var t = new LenovoUtils(username, password, baseInfoModel);
+                        var step1 = t.Login();
+                        var step2 = t.GetToken(step1);
+                        var step3 = t.GetSessionId(step2);
+                        var step4 = t.DaySign(step3.Res.Lenovoid, step3.Res.Sessionid, step3.Res.Token);
+                        if (step4.Res.Success)
+                        {
+                            Console.WriteLine($"{DateTime.Now}\t签到成功");
+                        }
+                        Console.WriteLine($"{DateTime.Now}\t签到结果:{step4.Res.RewardTips}");
 
-            if (step4.Res.Success) Console.WriteLine("签到成功");
-            Console.WriteLine($"签到结果:{step4.Res.RewardTips}");
+                        lastSignTime=DateTime.Now;
+                    }
+
+                    // 十分钟检查下
+                    Thread.Sleep(1000*60*10);
+                   
+                    
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+            }
+
+         
 
             Console.WriteLine();
         }
